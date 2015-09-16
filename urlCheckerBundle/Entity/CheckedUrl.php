@@ -13,6 +13,7 @@ class CheckedUrl
     /**
      * @ORM\Column(length=64)
      * @ORM\Id
+     * @ORM\generatedValue(strategy="NONE")
      */
     protected $urlmd5;
 
@@ -25,12 +26,12 @@ class CheckedUrl
     protected $url;
 
     /**
-     * @ORM\Column(type="decimal", scale=3)
+     * @ORM\Column(type="decimal", precision=32, scale=3)
      */
     protected $checkDate;
 
     /**
-     * @ORM\Column(length=4000)
+     * @ORM\Column(type="integer")
      */
     protected $status;
 
@@ -45,7 +46,7 @@ class CheckedUrl
             $time = microtime(true);
         }
 
-        $this->setUrl = ($url);
+        $this->setUrl($url);
         $this->status = $status;
         $this->checkDate = $time;
     }
@@ -61,5 +62,15 @@ class CheckedUrl
         $this->urlmd5 = md5($url);
 
         return $this;
+    }
+
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    public function setCheckDate($timestamp)
+    {
+        $this->checkDate = $timestamp;
     }
 }

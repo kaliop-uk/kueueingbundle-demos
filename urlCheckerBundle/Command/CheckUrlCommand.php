@@ -39,8 +39,16 @@ class CheckUrlCommand extends ContainerAwareCommand
             $out = curl_errno($ch);
         }
 
-        $manager = $this->getContainer()->get('doctrine')->getManager();
-        $manager->persist(new CheckedUrl($url, $out));
-        $manager->flush();
+        // nb: this is open to race conditions. Wish Doctrine ORM had upserts...
+        $em = $this->getContainer()->get('doctrine')->getManager();
+        $checked = $em->find('Kaliop\Queueing\Demos\UrlCheckerBundle\Entity\CheckedUrl', md5($url));
+        if ($checked == null) {
+            $checked = new CheckedUrl($url, $out, $time);
+            $em->persist($checked);
+        } else {
+            $checked->setStatus($out);
+            $checked->setCheckDate($time);
+        }
+        $em->flush();
     }
 }

@@ -22,9 +22,10 @@ class CheckUrlsFromFileCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $urls = file($input->getArgument('file'), FILE_IGNORE_NEW_LINES);
-        $manager = $this->getContainer()->get('doctrine')->getManager();
+        $em = $this->getContainer()->get('doctrine')->getManager();
 
         foreach($urls as $url) {
+            $time = time();
             $ch = curl_init($url);
             curl_setopt_array($ch, array(
                 CURLOPT_CUSTOMREQUEST => 'HEAD',
@@ -39,9 +40,15 @@ class CheckUrlsFromFileCommand extends ContainerAwareCommand
                 $out = curl_errno($ch);
             }
 
-            $manager
-                ->persist(new CheckedUrl($url, $out))
-                ->flush();
+            $checked = $em->find('Kaliop\Queueing\Demos\UrlCheckerBundle\Entity\CheckedUrl', md5($url));
+            if ($checked == null) {
+                $checked = new CheckedUrl($url, $out, $time);
+                $em->persist($checked);
+            } else {
+                $checked->setStatus($out);
+                $checked->setCheckDate($time);
+            }
+            $em->flush();
         }
     }
 }

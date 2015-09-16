@@ -7,7 +7,7 @@
     },
     "require": {
         "kaliop/queueingbundle": "~0.2",
-        "doctrine/orm": "*"
+        "doctrine/orm": "~2.4"
     },
     "require-dev": {
     }
