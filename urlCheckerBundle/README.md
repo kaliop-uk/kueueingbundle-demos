@@ -6,7 +6,7 @@ This demo shows how to implement a distributed link checker.
 It starts with a 'naive' approach and then moves on in successive steps to a fully distributed version.
 The goal is to reduce the total time taken by the checks.
 
-A sample list of urls is provided in the bundle, taken from Alexa Top-1M ranking. It contains 1000 urls.
+A sample list of urls is provided in the bundle, taken from Alexa Top-1M ranking. It contains 500 urls.
 You can use your own url list as well (e.g. if you have little outgoing internet connectivity from the webserver where
 you are running the test). If you do, keep in mind that the test works best when the urls to be tested take at least a
 few hundred milliseconds each.
