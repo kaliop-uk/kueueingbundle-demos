@@ -9,20 +9,24 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Kaliop\Queueing\Demos\UrlCheckerBundle\Entity\CheckedUrl;
 
-class CheckUrlsFromFileCommand extends ContainerAwareCommand
+class CheckUrlsCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
         $this
-            ->setName('kaliop_queueing:demo:checkurlsfromfile')
+            ->setName('kaliop_queueing:demo:checkurls')
             ->setDescription("Checks a list of URLs for validity")
-            ->addArgument('file', InputArgument::REQUIRED, 'The file with the list of urls to check (string)')
+            ->addArgument('urls', InputArgument::IS_ARRAY, 'The urls to check (separated by spaces)')
+            ->addOption('file', 'f', InputOption::VALUE_REQUIRED, 'A file with a list of urls to check (one per line)')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $urls = file($input->getArgument('file'), FILE_IGNORE_NEW_LINES);
+        $urls = $input->getArgument('urls');
+        if (($filename = $input->getOption('file')) != '') {
+            $urls = array_merge($urls, file($filename, FILE_IGNORE_NEW_LINES));
+        }
         $em = $this->getContainer()->get('doctrine')->getManager();
 
         $time = microtime(true);
