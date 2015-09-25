@@ -32,6 +32,11 @@ class CheckUrlsCommand extends ContainerAwareCommand
         $time = microtime(true);
         foreach($urls as $url) {
             $checkTime = time();
+
+            if (!preg_match('#https?://#', $url)) {
+                $url = 'http://' . $url;
+            }
+
             $ch = curl_init($url);
             curl_setopt_array($ch, array(
                 CURLOPT_RETURNTRANSFER => true,
