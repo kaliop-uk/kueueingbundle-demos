@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Kaliop\Queueing\Demos\UrlCheckerBundle\Entity\CheckedUrl;
 
 class CheckUrlsFromFileCommand extends ContainerAwareCommand
 {
@@ -24,11 +25,11 @@ class CheckUrlsFromFileCommand extends ContainerAwareCommand
         $urls = file($input->getArgument('file'), FILE_IGNORE_NEW_LINES);
         $em = $this->getContainer()->get('doctrine')->getManager();
 
+        $time = microtime(true);
         foreach($urls as $url) {
-            $time = time();
+            $checkTime = time();
             $ch = curl_init($url);
             curl_setopt_array($ch, array(
-                CURLOPT_CUSTOMREQUEST => 'HEAD',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FAILONERROR => true
             ));
@@ -40,15 +41,18 @@ class CheckUrlsFromFileCommand extends ContainerAwareCommand
                 $out = curl_errno($ch);
             }
 
-            $checked = $em->find('Kaliop\Queueing\Demos\UrlCheckerBundle\Entity\CheckedUrl', md5($url));
+            $checked = $em->find('KaliopQueueingDemosUrlCheckerBundle:CheckedUrl', md5($url));
             if ($checked == null) {
-                $checked = new CheckedUrl($url, $out, $time);
+                $checked = new CheckedUrl($url, $out, $checkTime);
                 $em->persist($checked);
             } else {
                 $checked->setStatus($out);
-                $checked->setCheckDate($time);
+                $checked->setCheckDate($checkTime);
             }
             $em->flush();
         }
+        $time = microtime(true) - $time;
+
+        $output->writeln(sprintf('%d URLs checked in %.3f secs', count($urls), $time));
     }
 }
