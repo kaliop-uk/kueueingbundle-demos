@@ -10,5 +10,11 @@
         "doctrine/orm": "~2.4"
     },
     "require-dev": {
-    }
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/tanoconsulting"
+        }
+    ]
 }
